@@ -5,6 +5,7 @@
 
 void shell() {
     char buf[128];
+
     printString("Welcome to IT 10 BRO!!!\n");
 
     while (true) {
