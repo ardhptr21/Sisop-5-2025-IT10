@@ -4,8 +4,9 @@
 #include "std_type.h"
 
 void shell();
+void printLogo();
 void parseCommand(char *buf, char *cmd, char arg[2][64]);
 
 // Tambahkan fungsi bila perlu
 
-#endif // __SHELL_H__
+#endif  // __SHELL_H__
