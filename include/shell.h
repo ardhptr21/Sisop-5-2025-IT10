@@ -4,9 +4,13 @@
 #include "std_type.h"
 
 void shell();
+void prompt();
 void printLogo();
 void parseCommand(char *buf, char *cmd, char arg[2][64]);
 
-// Tambahkan fungsi bila perlu
+void yogurt(char *buf);
+void realyogurt();
+void changeUser(char *user, char *to);
+void calc(char *op, char *a, char *b);
 
 #endif  // __SHELL_H__
