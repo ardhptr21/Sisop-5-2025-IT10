@@ -35,6 +35,11 @@ void shell() {
             continue;
         }
 
+        if (strcmp(cmd, "grandcompany")) {
+            grandCompany(gc, colorCode, arg[0]);
+            continue;
+        } 
+
         if (strcmp(cmd, "add") || strcmp(cmd, "sub") || strcmp(cmd, "mul") || strcmp(cmd, "div")) {
             calc(cmd, arg[0], arg[1]);
             continue;
@@ -140,6 +145,24 @@ void changeUser(char *user, char *to) {
         printString(user);
         printString("\n");
     }
+}
+
+void grandCompany(char *gc, char *colorCode, char *arg) {
+    if (strcmp(arg[0], "maelstorm")) {
+        strcpy(gc, "@Storm");
+        strcpy(colorCode, "\033[1;31m");
+    } else if (strcmp(arg[0], "twinadder")) {
+        strcpy(gc, "@Serpent");
+        strcpy(colorCode, "\033[1;33m");
+    }  else if (strcmp(arg[0], "immortalflames")) {
+        strcpy(gc, "@Flame");
+        strcpy(colorCode, "\033[1;34m");
+    }  else {
+        printString("Error: invalid grand companmy\n");
+        return;
+    }
+
+    clearScreen();
 }
 
 void calc(char *op, char *a, char *b) {
