@@ -8,16 +8,18 @@ void shell() {
     char cmd[64];
     char arg[2][64];
     char user[64];
+    char gc[64];
 
     printLogo();
     strcpy(user, "user");
 
     while (true) {
-        prompt(user, buf);
+        prompt(user, gc, buf);
         parseCommand(buf, cmd, arg);
 
         if (strcmp(cmd, "clear")) {
             clearScreen();
+            setColor(WHITE_COLOR);
             continue;
         }
         if (strcmp(cmd, "yo") || strcmp(cmd, "gurt")) {
@@ -36,9 +38,9 @@ void shell() {
         }
 
         if (strcmp(cmd, "grandcompany")) {
-            grandCompany(gc, colorCode, arg[0]);
+            grandCompany(gc, arg[0]);
             continue;
-        } 
+        }
 
         if (strcmp(cmd, "add") || strcmp(cmd, "sub") || strcmp(cmd, "mul") || strcmp(cmd, "div")) {
             calc(cmd, arg[0], arg[1]);
@@ -50,8 +52,11 @@ void shell() {
     }
 }
 
-void prompt(char *user, char *buf) {
+void prompt(char *user, char *top, char *buf) {
     printString(user);
+    if (top[0] != '\0') {
+        printString(top);
+    }
     printString("> ");
     readString(buf);
 }
@@ -119,12 +124,16 @@ void yogurt(char *buf) {
 }
 
 void realyogurt(void) {
-    static int seed = 0;
-    static char *strings[] = {"yo", "ts unami gng </3", "sygau"};
+    static unsigned int seed = 0;
+    static char *strings[] = {
+        "yo",
+        "ts unami gng </3",
+        "sygau"};
+
     int random_index;
 
     if (seed == 0) {
-        seed = interrupt(0x1A, 0, 0, 0, 0);
+        seed = getBiosTick();
     }
 
     seed = seed * 17 + 7;  // LCG
@@ -147,18 +156,18 @@ void changeUser(char *user, char *to) {
     }
 }
 
-void grandCompany(char *gc, char *colorCode, char *arg) {
-    if (strcmp(arg[0], "maelstorm")) {
-        strcpy(gc, "@Storm");
-        strcpy(colorCode, "\033[1;31m");
-    } else if (strcmp(arg[0], "twinadder")) {
-        strcpy(gc, "@Serpent");
-        strcpy(colorCode, "\033[1;33m");
-    }  else if (strcmp(arg[0], "immortalflames")) {
-        strcpy(gc, "@Flame");
-        strcpy(colorCode, "\033[1;34m");
-    }  else {
-        printString("Error: invalid grand companmy\n");
+void grandCompany(char *top, char *arg) {
+    if (strcmp(arg, "maelstorm")) {
+        strcpy(top, "@Storm");
+        setColor(RED_COLOR);
+    } else if (strcmp(arg, "twinadder")) {
+        strcpy(top, "@Serpent");
+        setColor(YELLOW_COLOR);
+    } else if (strcmp(arg, "immortalflames")) {
+        strcpy(top, "@Flame");
+        setColor(BLUE_COLOR);
+    } else {
+        printString("Error: invalid grand company\n");
         return;
     }
 
