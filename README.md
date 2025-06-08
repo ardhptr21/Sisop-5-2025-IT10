@@ -594,6 +594,15 @@ Function `parseCommand` digunakan untuk membaca input dari user yang akan dimapp
 
 ### Soal 1
 
+Untuk soal ini diharuskan untuk menggunakan kekuatan The Echo agar Operating System dapat mengulangi kata yang user ucapkan. Caranya sangat simple:
+
+```c
+printString(buf);
+printString("\n");
+```
+
+Perintah diatas akan mengulangi setiap kata yang diucapkan user selama bukan command seperti "user", "clear", "add", dan semacamnya.
+
 ### Soal 2
 
 **Dikerjakan Oleh: Kanafira Vanesha Putri (5027241010)**
