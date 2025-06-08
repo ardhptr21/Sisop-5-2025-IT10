@@ -596,7 +596,74 @@ Function `parseCommand` digunakan untuk membaca input dari user yang akan dimapp
 
 ### Soal 2
 
+**Dikerjakan Oleh: Kanafira Vanesha Putri (5027241010)**
+
+Soal ini meminta agar shell mengenali dua perintah spesifik: yo dan gurt, yang saling merespon satu sama lain. Sehingga, jika input adalah yo, maka output-nya gurt, dan sebaliknya jika input adalah gurt, maka output-nya yo.
+
+Untuk menyelesaikan hal ini, ditambahkan pengecekan di shell() dibagian command parser:
+
+```c
+if (strcmp(cmd, "yo") || strcmp(cmd, "gurt")) {
+    yogurt(buf);
+    continue;
+}
+```
+
+Kemudian, fungsi yogurt() dibuat untuk menangani pembalikan kata berdasarkan input pengguna:
+
+```c
+void yogurt(char *buf) {
+    if (strcmp(buf, "yo")) {
+        printString("gurt\n");
+    } else {
+        printString("yo\n");
+    }
+}
+```
+
 ### Soal 3
+
+**Dikerjakan Oleh: Kanafira Vanesha Putri (5027241010)**
+
+Menambahkan fitur untuk mengganti nama pengguna pada prompt shell. Secara default, username adalah user. Ketika mengetik user <nama>, maka prompt akan berubah menjadi <nama>. Jika mengetik user tanpa argumen, maka akan kembali menjadi user.
+
+Pertama adalah menambahkan pengecekan command user di fungsi shell():
+
+```c
+if (strcmp(cmd, "user")) {
+    changeUser(user, arg[0]);
+    continue;
+}
+```
+
+Lalu menambahkan fungsi changeUser() untuk mengubah isi variabel user:
+
+```c
+void changeUser(char *user, char *to) {
+    if (to[0] == '\0') {
+        strcpy(user, "user");
+    } else {
+        strcpy(user, to);
+    }
+
+    printString("Username changed to ");
+    printString(user);
+    printString("\n");
+}
+```
+
+Fungsi changeUser() pakai strcpy buat ganti nama user. Nama ini disimpan di variabel user, dan tiap kali shell nunggu input, fungsi prompt() bakal nampilin isi user itu. Jadi kalau namanya diganti, langsung keliatan di prompt-nya.
+
+```c
+void prompt(char *user, char *top, char *buf) {
+    printString(user);
+    if (top[0] != '\0') {
+        printString(top);
+    }
+    printString("> ");
+    readString(buf);
+}
+```
 
 ### Soal 4
 
