@@ -190,4 +190,596 @@ https://github.com/user-attachments/assets/1cfa66b1-b2f5-4e3e-a4b2-ec8b012f6fbb
 
 ## Laporan
 
-> Isi sesuai pengerjaan.
+### Initial Setup
+
+**Dikerjakan Oleh: Ardhi Putra Pradana (5027241022)**
+
+#### std_lib.c
+
+```c
+int div(int a, int b) {
+    int quotient = 0;
+    int isNegative = 0;
+    int absA = a, absB = b;
+
+    if (b == 0) return 0;
+
+    if (a < 0) {
+        isNegative = !isNegative;
+        absA = -a;
+    }
+    if (b < 0) {
+        isNegative = !isNegative;
+        absB = -b;
+    }
+
+    while (absA >= absB) {
+        absA -= absB;
+        quotient++;
+    }
+
+    return isNegative ? -quotient : quotient;
+}
+```
+
+Pelengkapan function `div` disini digunakan untuk melakukan operasi pembagian, dikarenakan secara default operasi div ini tidak disupport oleh system 16 bit ansi. Function diatas menerapkan operasi perulangan dan operasi aritmatika standar seperti tambah dan kurang untuk mendapatkan hasil baginya.
+
+```c
+int mod(int a, int b) {
+    int absA = a < 0 ? -a : a;
+    int absB = b < 0 ? -b : b;
+
+    if (b == 0) return 0;
+
+    while (absA >= absB) {
+        absA -= absB;
+    }
+
+    return a < 0 ? -absA : absA;
+}
+```
+
+Function `mod` digunakan untuk operasi modulus, yang sama hal nya dengan division sebelumnya bahwa operasi modulus tidak secara default disupport, untuk menerapkannya menggunakan konsep perulangan untuk mendapatkan hasil modulusnya.
+
+```c
+bool strcmp(char *str1, char *str2) {
+    int i = 0, flag = 0;
+
+    while (str1[i] != '\0' && str2[i] != '\0') {
+        if (str1[i] != str2[i]) {
+            flag = 1;
+            break;
+        }
+        i++;
+    }
+
+    if (flag == 0 && str1[i] == '\0' && str2[i] == '\0') return 1;
+    return 0;
+}
+```
+
+Penerapan function `strcmp` dibuat untuk digunakan ketika ingin membandingkan dua string yang sama nantinya, nah konsep low level disini digunakan yaitu dengan membandingkan char per char dari string yang ada pada argument dan melihat apakah semua char tersebut sama disetiap posisinya.
+
+```c
+void strcpy(char *dst, char *src) {
+    int i = 0;
+    while (src[i] != '\0') {
+        dst[i] = src[i];
+        i++;
+    }
+    dst[i] = '\0';
+}
+```
+
+Function `strcpy` menerupakan penerapan function untuk melakukan copy dari string ke string yang lain dialamat memory yang berbeda, penerapannya menggunakan assigning manual char per char ke string target.
+
+```c
+void clear(byte *buf, unsigned int size) {
+    int i = 0;
+    while (i < size) {
+        buf[i] = 0x0;
+        i++;
+    }
+}
+```
+
+Function `clear` digunakan untuk melakukang clearing buffer, yaitu dengan cara melakukan assigning null byte ke setiap char sepanjang size string tersebit.
+
+```c
+void atoi(char *str, int *num) {
+    int i = 0;
+    int result = 0;
+    int sign = 1;
+
+    while (str[i] == ' ' || str[i] == '\t') i++;
+
+    if (str[i] == '-') {
+        sign = -1;
+        i++;
+    } else if (str[i] == '+') {
+        i++;
+    }
+
+    while (str[i] >= '0' && str[i] <= '9') {
+        result = result * 10 + (str[i] - '0');
+        i++;
+    }
+
+    *num = sign * result;
+}
+```
+
+Function `atoi` (ascii to integer) digunakan untuk mengubah sebuah string menjadi value integer, dimana caranya adalah dengan melihat semua possibility sebuah angka yang ada pada string tersebut, lalu dengan cara menggunakan konsep `decrement` dengan zero value untuk setiap char yang valid dan melakukan perkalian 10 untuk melihat decimal point.
+
+```c
+void itoa(int num, char *str) {
+    int i = 0;
+    int isNegative = 0;
+    int start, end;
+    char temp;
+
+    if (num == 0) {
+        str[i++] = '0';
+        str[i] = '\0';
+        return;
+    }
+
+    if (num < 0) {
+        isNegative = 1;
+        num = -num;
+    }
+
+    while (num > 0) {
+        str[i++] = mod(num, 10) + '0';
+        num = div(num, 10);
+    }
+
+    if (isNegative) {
+        str[i++] = '-';
+    }
+
+    str[i] = '\0';
+
+    start = 0;
+    end = i - 1;
+    while (start < end) {
+        temp = str[start];
+        str[start] = str[end];
+        str[end] = temp;
+        start++;
+        end--;
+    }
+}
+```
+
+Function `itoa` (integer to ascii) digunakan untuk mengubah sebuah angka menjadi string, dimana penerapannya sedikit lebih rumit dengan menggabungkan operasi `mod` dan `div` secara bersamaan untuk mendapatkan tiap decimal int yang akan diconvert menjadi string.
+
+#### kernel.c
+
+> tambahan value di kernel.h
+
+```c
+#define WHITE_COLOR 0x000F
+#define RED_COLOR 0x000C
+#define YELLOW_COLOR 0x000E
+#define BLUE_COLOR 0x0001
+
+void setColor(int color);
+```
+
+Define variable color untuk memudahkan mapping color terminal yang dibutuhkan, dan juga placeholder function `setColor` untuk mengubah global variable.
+
+```c
+static int currentColor = WHITE_COLOR;
+
+int main() {
+    clearScreen();
+    shell();
+    return 0;
+}
+```
+
+variable global diatas akan digunakan sebagai changer terminal color, yang nanti dapat digunakan untuk fitur yang mengharuskan untuk mengganti terminal colornya. Dan function `main` sebagai gerbang utama dimana OS ini akan dijalankan.
+
+```c
+void setColor(int color) {
+    currentColor = color;
+}
+```
+
+Function `setColor` yang sangat simple digunakan untuk mengubah global variable `currentColor`.
+
+```c
+void printString(char *str) {
+    char *p = str;
+    while (*p != 0) {
+        if (*p == '\n') {
+            interrupt(0x10, 0x0e0d, 0x0000, 0x0001, 0);
+            interrupt(0x10, 0x0e0a, 0x0000, 0x0001, 0);
+        } else {
+            interrupt(0x10, 0x0900 | *p, currentColor, 0x0001, 0);
+            interrupt(0x10, 0x0e00 | *p, 0x0000, 0x0001, 0);
+        }
+        p++;
+    }
+}
+```
+
+Function `printString` digunakan untuk menampilkan sebuah string ke `console` atau `terminal`, dimana penerapannya menggunakan low level function yaitu `interrupt` yang sudah didefinisikan pada `assembly kernel.asm`. Penerapannya adalah dengan melakukan loop satu persatu karakter, dan ketika kasus khusus char tersebut adalah `\n` (LF) maka akan diconvert menjadi `\r\n` (CRLF), sisanya adalah menampilkan char dari tiap string tersebut, dengan menggunakan dua interrupt, yang pertama untuk melakukan set color dan yang kedua adalah melakukan resetting point colornya untuk tiap karakter.
+
+```c
+void readString(char *buf) {
+    char c;
+    int i = 0;
+
+    while (1) {
+        c = interrupt(0x16, 0, 0, 0, 0);
+
+        if (c == '\r') {
+            interrupt(0x10, 0x0e0d, 0x0000, 0x0001, 0);
+            interrupt(0x10, 0x0e0a, 0x0000, 0x0001, 0);
+            break;
+        } else if (c == '\b') {
+            if (i > 0) {
+                i--;
+                interrupt(0x10, 0x0e08, 0x0000, 0x0001, 0);
+                interrupt(0x10, 0x0e20, 0x0000, 0x0001, 0);
+                interrupt(0x10, 0x0e08, 0x0000, 0x0001, 0);
+            }
+        } else {
+            interrupt(0x10, 0x0900 | c, currentColor, 0x0001, 0);
+            interrupt(0x10, 0x0e00 | c, 0x0000, 0x0001, 0);
+            buf[i++] = c;
+        }
+    }
+    buf[i] = 0;
+}
+```
+
+Function `readString` digunakan untuk membaca input dari user yang dikirimkan ke OS ini, dimana penarapannya adalah dengan membaca 0x16 offset dari interrupt bios systemnya untuk setiap loopingnya, lalu ada beberapa bagian yaitu `\r` akan diubah menjadi `\r\n`, dan `\b` akan diubah menjadi `\b \b`, dan sisanya adalah printing karakter biasa untuk setiap buffer nya.
+
+```c
+void clearScreen() {
+    interrupt(0x10, 0x0003, 0x0007, 0, 0);
+    interrupt(0x10, 0x0200, 0x0000, 0, 0);
+}
+```
+
+Function `clearScreen` digunakan untuk membersihkan semua output yang ada diconsole, yaitu baris pertama melakukan setting screen size, dan yang kedua adalah mengubah posisi kursor ke `top-left`.
+
+#### shell.c
+
+> penambahan placeholder function pada shell.h
+
+```h
+void yogurt(char *buf);
+void realyogurt();
+void changeUser(char *user, char *to);
+void grandCompany(char *top, char *arg);
+void calc(char *op, char *a, char *b);
+```
+
+Placholder yang diguanakan untuk setiap handler function disetiap custom operation pada OS yang dibuat.
+
+```c
+void shell() {
+    char buf[128];
+    char cmd[64];
+    char arg[2][64];
+    char user[64];
+    char gc[64];
+
+    printLogo();
+    strcpy(user, "user");
+
+    while (true) {
+        prompt(user, gc, buf);
+        parseCommand(buf, cmd, arg);
+
+        if (strcmp(cmd, "clear")) {
+            clearScreen();
+            setColor(WHITE_COLOR);
+            continue;
+        }
+        if (strcmp(cmd, "yo") || strcmp(cmd, "gurt")) {
+            yogurt(buf);
+            continue;
+        }
+
+        if (strcmp(cmd, "yogurt")) {
+            realyogurt();
+            continue;
+        }
+
+        if (strcmp(cmd, "user")) {
+            changeUser(user, arg[0]);
+            continue;
+        }
+
+        if (strcmp(cmd, "grandcompany")) {
+            grandCompany(gc, arg[0]);
+            continue;
+        }
+
+        if (strcmp(cmd, "add") || strcmp(cmd, "sub") || strcmp(cmd, "mul") || strcmp(cmd, "div")) {
+            calc(cmd, arg[0], arg[1]);
+            continue;
+        }
+
+        printString(buf);
+        printString("\n");
+    }
+}
+```
+
+Function `shell` adalah entrypoint dimana semua tahap operasi pada shell/console akan dilakukan, yaitu dengan melakukan while loop atau perulangan tanpa henti, dan terus melakukan `read` input dari user dan melakukan `output` dari setiap command yang ada.
+Hal utama yang dilakukan pada function ini adalah untuk membandingkan operasi apa yang akan dilakukan dan memanggil handlernya sesuai dengan command yang sesuai.
+
+```c
+void prompt(char *user, char *top, char *buf) {
+    printString(user);
+    if (top[0] != '\0') {
+        printString(top);
+    }
+    printString("> ");
+    readString(buf);
+}
+```
+
+Function `prompt` digunakan untuk menampilkan prompting ke user atau membaca input dari user, dimana user nantinya akan memberikan command - command yang sesuai.
+
+```c
+void printLogo() {
+    printString(" ____ ___ ____   ___  ____  \n");
+    printString("/ ___|_ _/ ___| / _ \\|  _ \\ \n");
+    printString("\\___ \\| |\\___ \\| | | | |_) |\n");
+    printString(" ___) | | ___) | |_| |  __/ \n");
+    printString("|____/___|____/ \\___/|_|    \n\n");
+    printString(" ___ _____   _  ___  \n");
+    printString("|_ _|_   _| | |/ _ \\ \n");
+    printString(" | |  | |   | | | | |\n");
+    printString(" | |  | |   | | |_| |\n");
+    printString("|___| |_|   |_|\\___/ \n\n");
+    printString("Welcome to our very lite OS!\n\n");
+}
+```
+
+Function `printLogo` adalah function yang hanya untuk menampilkan header output dari OS untuk menampilkan string dari logo OS ini.
+
+```c
+void parseCommand(char *buf, char *cmd, char arg[2][64]) {
+    int i = 0, j = 0, k = 0;
+    int argIndex = -1;
+
+    cmd[0] = '\0';
+    arg[0][0] = '\0';
+    arg[1][0] = '\0';
+
+    while (buf[i] == ' ' || buf[i] == '\t') i++;
+
+    while (buf[i] != '\0' && buf[i] != '\n') {
+        if (buf[i] == ' ' || buf[i] == '\t') {
+            if (argIndex == -1) {
+                cmd[j] = '\0';
+                argIndex = 0;
+            } else if (argIndex < 2) {
+                arg[argIndex][k] = '\0';
+                argIndex++;
+                k = 0;
+            }
+            while (buf[i] == ' ' || buf[i] == '\t') i++;
+            continue;
+        }
+
+        if (argIndex == -1) {
+            cmd[j++] = buf[i++];
+        } else if (argIndex < 2) {
+            arg[argIndex][k++] = buf[i++];
+        } else {
+            i++;
+        }
+    }
+
+    if (argIndex == -1) {
+        cmd[j] = '\0';
+    } else if (argIndex < 2) {
+        arg[argIndex][k] = '\0';
+    }
+}
+```
+
+Function `parseCommand` digunakan untuk membaca input dari user yang akan dimapping menjadi command - command yang sesuai, function ini sebenarnya akan membagi menjadi 3 hal, yaitu membaca `main command` atau ini adalah string posisi pertama sebelum tanda spasi, dan sisanya adalah membaca 2 argument setelah `main command` yang dipisahkan dengan spasi juga, dan function ini hanya membaca 2 argument saja setelah argument `main command`, dimana hasil parsing ini dapat digunakan dan diterapkan untuk membuat handler command yang sesuai.
+
+## Pengerjaan Soal
+
+### Soal 1
+
+### Soal 2
+
+### Soal 3
+
+### Soal 4
+
+**Dikerjakan Oleh: Ardhi Putra Pradana (5027241022)**
+
+```c
+void grandCompany(char *top, char *arg) {
+    if (strcmp(arg, "maelstorm")) {
+        strcpy(top, "@Storm");
+        setColor(RED_COLOR);
+    } else if (strcmp(arg, "twinadder")) {
+        strcpy(top, "@Serpent");
+        setColor(YELLOW_COLOR);
+    } else if (strcmp(arg, "immortalflames")) {
+        strcpy(top, "@Flame");
+        setColor(BLUE_COLOR);
+    } else {
+        printString("Error: invalid grand company\n");
+        return;
+    }
+
+    clearScreen();
+}
+```
+
+Dibagian soal ini objektifnya adalah hanya untuk mengganti warna dari console/terminal yang ada, dan kemudian mengubah `top host` nya untuk menampilkan hal yang sesuai. Disini menggunakan `strcpy` untuk melakukan write string ke `top` variable dan memanggil `setColor` untuk mengubah global color terminal yang ada.
+
+### Soal 5
+
+**Dikerjakan Oleh: Ardhi Putra Pradana (5027241022)**
+
+```c
+void calc(char *op, char *a, char *b) {
+    int num1 = 0, num2 = 0, result = 0;
+    char *out;
+
+    if (a[0] == '\0' || b[0] == '\0') {
+        printString("Error: arguments missing\n");
+        return;
+    }
+
+    atoi(a, &num1);
+    atoi(b, &num2);
+
+    if (strcmp(op, "add")) {
+        result = num1 + num2;
+    } else if (strcmp(op, "sub")) {
+        result = num1 - num2;
+    } else if (strcmp(op, "mul")) {
+        result = num1 * num2;
+    } else if (strcmp(op, "div")) {
+        if (num2 == 0) {
+            printString("Error: division by zero\n");
+            return;
+        }
+
+        result = num1 / num2;
+    }
+
+    itoa(result, out);
+
+    printString(out);
+    printString("\n");
+}
+```
+
+Sangat komprehensif jika dilihat, hanya dengan melihat operasi apa yang dimasukkan oleh user, kemudian sesuaikan operasi tersebut dengan bilangan dari argument pertama dan kedua. Menggunakan std function `atoi` untuk mengubah dari string ke integer agar bisa dilakukan operasi aritmetik, kemudian sesuaikan operasinya, dan lalu balikkan kembali ke string menggunakan `itoa` dan lalu tampilkan hasilnya.
+
+### Soal 6
+
+**Dikerjakan Oleh: Ardhi Putra Pradana (5027241022)**
+
+```c
+void realyogurt(void) {
+    static unsigned int seed = 0;
+    static char *strings[] = {
+        "yo",
+        "ts unami gng </3",
+        "sygau"};
+
+    int random_index;
+
+    if (seed == 0) {
+        seed = getBiosTick();
+    }
+
+    seed = seed * 17 + 7;  // LCG
+    random_index = mod(mod(seed, 3) + 3, 3);
+
+    printString("gurt> ");
+    printString(strings[random_index]);
+    printString("\n");
+}
+```
+
+Objektif soal ini adalah untuk menampilkan random string yaitu `yo, ts unami gng </3, sygau`, nah biasanya untuk melakukan random kita memerlukan interface `pseudo-random` untuk bisa mendapatkan random value, dalam kasus ini sudah disediakan low-level function `getBiosTick` yang akan mendapatkan `pseudo-random` value dari BIOS yang dapat dimanfaatkan pada soal ini. Lalu kemudian menggunakan formula LCG (Linear Congruential Generator) untuk mendapatkan hasil akhir value `pseudo-random` nya. Setelah itu dapatkan `random_index` untuk memanggil random index dari setiap array value yang ada.
+
+### Soal 7
+
+**Dikerjakan Oleh: Ardhi Putra Pradana (5027241022)**
+
+```c
+prepare:
+	dd if=/dev/zero of=bin/floppy.img bs=512 count=2880
+
+bootloader:
+	nasm -f bin src/bootloader.asm -o bin/bootloader.bin
+	dd if=bin/bootloader.bin of=bin/floppy.img conv=notrunc bs=512 count=1
+
+stdlib:
+	bcc -ansi -c -Iinclude src/std_lib.c -o bin/std_lib.o
+
+shell:
+	bcc -ansi -c -Iinclude src/shell.c -o bin/shell.o
+
+kernel:
+	nasm -f as86 src/kernel.asm -o bin/kernel-asm.o
+	bcc -ansi -c -Iinclude src/kernel.c -o bin/kernel.o
+
+link:
+	ld86 -o bin/kernel.bin -d bin/kernel.o bin/kernel-asm.o bin/shell.o bin/std_lib.o
+	dd if=bin/kernel.bin of=bin/floppy.img conv=notrunc bs=512 seek=1
+
+build: prepare bootloader stdlib shell kernel link
+
+run: build
+	bochs -f bochsrc.txt
+```
+
+Dalam soal 5 ini adalah melengkapi file `makefile` untuk bisa meng-compile dan mem-bundling resource raw code OS yang ada menjadi `disk image` file yang nantinya akan dibooting oleh bootloader.
+
+```make
+prepare:
+	dd if=/dev/zero of=bin/floppy.img bs=512 count=2880
+```
+
+Tahap pertama untuk handler `prepare` adalah melakukan inisiasi disk image
+
+```make
+bootloader:
+	nasm -f bin src/bootloader.asm -o bin/bootloader.bin
+	dd if=bin/bootloader.bin of=bin/floppy.img conv=notrunc bs=512 count=1
+```
+
+Tahap untuk `bootloader` adalah melakukan compiling assembly dari `bootlader.asm` menjadi binary file, kemudian melakukan write hasil binary tersebut ke `disk image` sebelumnya.
+
+```make
+stdlib:
+	bcc -ansi -c -Iinclude src/std_lib.c -o bin/std_lib.o
+```
+
+Tahap `stdlib` sangat simple hanya melakukan compiling file `std_lib.c` dengan menggunakan `bcc` compiler dan menggunakan format `ansi`
+
+```make
+shell:
+	bcc -ansi -c -Iinclude src/shell.c -o bin/shell.o
+```
+
+Tahap `shell` sangat simple hanya melakukan compiling file `shell.c` dengan menggunakan `bcc` compiler dan menggunakan format `ansi`
+
+```make
+kernel:
+	nasm -f as86 src/kernel.asm -o bin/kernel-asm.o
+	bcc -ansi -c -Iinclude src/kernel.c -o bin/kernel.o
+```
+
+Tahap `kernel` adalah melakukan compile/build assembly `kernel.asm` menjadi binary file, dan kemudian melakukan compile file `kernel.c` menggunaakn `bcc` compiler dengan format `ansi`
+
+```make
+link:
+	ld86 -o bin/kernel.bin -d bin/kernel.o bin/kernel-asm.o bin/shell.o bin/std_lib.o
+	dd if=bin/kernel.bin of=bin/floppy.img conv=notrunc bs=512 seek=1
+```
+
+Tahap `link` adalah melakukan linking setiap binary file menjadi satu binary, linker yang digunakan adalah `ld86`, semua file **.o** akan dilinking dan outputnya menjadi `kernel.bin`, kemudian hasil dari `kernel.bin` akan diwrite ke `disk image`.
+
+```make
+build: prepare bootloader stdlib shell kernel link
+
+run: build
+	bochs -f bochsrc.txt
+```
+
+Tahap `build` akan menjadi entrypoint yang dipanggil independent, dan memiliki dependent ke handler make lainnya yang akan dipanggil satu persatu.
+
+Tahap `run` akan menjalankan `bochs` bootloader dengan membaca config `bochsrc.txt`
