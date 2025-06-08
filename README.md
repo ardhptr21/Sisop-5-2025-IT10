@@ -594,6 +594,8 @@ Function `parseCommand` digunakan untuk membaca input dari user yang akan dimapp
 
 ### Soal 1
 
+**Dikerjakan Oleh: Aslam Ahmad Usman (5027241074)**
+
 Untuk soal ini diharuskan untuk menggunakan kekuatan The Echo agar Operating System dapat mengulangi kata yang user ucapkan. Caranya sangat simple:
 
 ```c
